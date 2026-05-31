@@ -46,7 +46,7 @@ export const sections: Section[] = [
     number: 2,
     title: "Algorithmic bias",
     subtitle:
-      "Where bias originates in your Reels — and who actively manages it.",
+      "Where bias originates in your Reels, and who actively manages it.",
     capability: "Nonbiasedness",
     accent: "rythmic-red",
   },
@@ -76,7 +76,7 @@ export const dimensions: Dimension[] = [
     strengthCopy:
       "Humans retain clear editorial authority over AI-generated material before it goes live.",
     gapCopy:
-      "AI outputs are flowing through with limited human override — that erodes the authenticity signal Gen Z reads in the Reel.",
+      "AI outputs are flowing through with limited human override, that erodes the authenticity signal Gen Z reads in the Reel.",
     recommendation:
       "Make human approval a non-skippable step in the Reels workflow. Define who can override an AI output, on what grounds, and document the override so the practice is visible to the team.",
   },
@@ -87,15 +87,15 @@ export const dimensions: Dimension[] = [
     section: "authenticity",
     source: "emergent",
     critical: true,
-    evidence: "Emergent — 8 of 11 respondents (critical threshold).",
+    evidence: "Emergent: 8 of 11 respondents (critical threshold).",
     blurb:
-      "Visible human craft — performance, hand-shot footage, on-camera presence — sits inside the Reel.",
+      "Visible human craft, performance, hand-shot footage, on-camera presence, sits inside the Reel.",
     strengthCopy:
       "Your Reels carry visible human craft, which the study identifies as the single strongest authenticity signal in this set.",
     gapCopy:
       "There is little visible human craft in your Reels. This was the most-cited authenticity recovery lever in the study.",
     recommendation:
-      "Brief one element of the Reel — a face, a hand, a real location — that is unambiguously human-made and put it where Gen Z will see it in the first two seconds. Treat full end-to-end AI generation as the exception, not the default.",
+      "Brief one element of the Reel, a face, a hand, a real location, that is unambiguously human-made and put it where Gen Z will see it in the first two seconds. Treat full end-to-end AI generation as the exception, not the default.",
   },
   {
     id: "original-creativity",
@@ -104,15 +104,15 @@ export const dimensions: Dimension[] = [
     section: "authenticity",
     source: "emergent",
     critical: true,
-    evidence: "Emergent — 7 of 11 respondents (critical threshold).",
+    evidence: "Emergent: 7 of 11 respondents (critical threshold).",
     blurb:
       "The Reel starts from a distinctive brand idea, not a generic AI-default concept.",
     strengthCopy:
-      "Your team pushes past AI defaults to land on something distinctive — exactly what the study found protects trust.",
+      "Your team pushes past AI defaults to land on something distinctive, exactly what the study found protects trust.",
     gapCopy:
       "Reels are leaning on generic AI-default concepts. Gen Z increasingly recognises and discounts these.",
     recommendation:
-      "Separate ideation from production. Lock the creative concept with humans first, then bring AI in for execution — not the other way round. If the AI suggested the core idea, assume it has suggested it to ten other brands this week.",
+      "Separate ideation from production. Lock the creative concept with humans first, then bring AI in for execution, not the other way round. If the AI suggested the core idea, assume it has suggested it to ten other brands this week.",
   },
   {
     id: "use-case-fit",
@@ -121,7 +121,7 @@ export const dimensions: Dimension[] = [
     section: "authenticity",
     source: "emergent",
     critical: false,
-    evidence: "Emergent — supporting moderator.",
+    evidence: "Emergent: supporting moderator.",
     blurb:
       "The choice to use GAI matches the specific Reel's creative purpose.",
     strengthCopy:
@@ -158,15 +158,15 @@ export const dimensions: Dimension[] = [
     source: "emergent",
     critical: true,
     evidence:
-      "Emergent — 10 of 11 respondents (the strongest theme in the dataset).",
+      "Emergent: 10 of 11 respondents (the strongest theme in the dataset).",
     blurb:
       "The team interrogates AI outputs and the team's own briefings, rather than accepting either at face value.",
     strengthCopy:
-      "Active critical-thinking practice — the strongest single theme in the study — is established in your team.",
+      "Active critical-thinking practice, the strongest single theme in the study, is established in your team.",
     gapCopy:
       "AI outputs and team briefings are passing through under-challenged. This was the single most-cited bias moderator in the study.",
     recommendation:
-      "Make 'what's biased about this brief?' a named step before any AI tool is opened. Empower the most junior person in the room to flag it — they are usually closest to the audience the bias hits.",
+      "Make 'what's biased about this brief?' a named step before any AI tool is opened. Empower the most junior person in the room to flag it, they are usually closest to the audience the bias hits.",
   },
   {
     id: "brand-audience-fit",
@@ -175,7 +175,7 @@ export const dimensions: Dimension[] = [
     section: "bias",
     source: "emergent",
     critical: true,
-    evidence: "Emergent — 7 of 11 respondents (critical threshold).",
+    evidence: "Emergent: 7 of 11 respondents (critical threshold).",
     blurb:
       "AI-generated Reels reflect the lived reality of the actual Gen Z target audience.",
     strengthCopy:
@@ -199,7 +199,7 @@ export const dimensions: Dimension[] = [
     blurb:
       "Credit, consent and compensation are treated as a single practice, not as a disclosure tickbox.",
     strengthCopy:
-      "Your IP practice covers credit, consent and compensation together — the broader frame R1 introduced.",
+      "Your IP practice covers credit, consent and compensation together, the broader frame R1 introduced.",
     gapCopy:
       "Disclosure may be in place, but consent and compensation are not consistently part of the same practice.",
     recommendation:
@@ -212,7 +212,7 @@ export const dimensions: Dimension[] = [
     section: "ip",
     source: "emergent",
     critical: false,
-    evidence: "Emergent — 4 of 11 respondents.",
+    evidence: "Emergent: 4 of 11 respondents.",
     blurb:
       "Named creators are visibly involved in AI-assisted Reels.",
     strengthCopy:
@@ -229,11 +229,11 @@ export const dimensions: Dimension[] = [
     section: "ip",
     source: "emergent",
     critical: true,
-    evidence: "Emergent — 5 of 11 respondents (critical threshold).",
+    evidence: "Emergent: 5 of 11 respondents (critical threshold).",
     blurb:
       "You can trace and disclose what trained the model and what was generated by it.",
     strengthCopy:
-      "Your team can trace and disclose AI provenance in Reels — the practice the study identifies as load-bearing for IP trust.",
+      "Your team can trace and disclose AI provenance in Reels, the practice the study identifies as load-bearing for IP trust.",
     gapCopy:
       "You cannot currently trace where AI-generated assets in your Reels came from. The study identifies this as the practice IP-trust hinges on.",
     recommendation:
@@ -247,7 +247,7 @@ export const dimensions: Dimension[] = [
     source: "emergent",
     critical: false,
     evidence:
-      "Emergent — 5 of 11 respondents (managerial antecedent, sits outside the model itself).",
+      "Emergent: 5 of 11 respondents (managerial antecedent, sits outside the model itself).",
     blurb:
       "Internal legal and compliance review of AI-generated Reels is established and current.",
     strengthCopy:
@@ -255,141 +255,72 @@ export const dimensions: Dimension[] = [
     gapCopy:
       "Legal review of AI-generated Reels is ad hoc and the team is not current on the law.",
     recommendation:
-      "Stand up a lightweight, named legal review path for AI-assisted Reels and refresh the team's IP-and-AI training at least twice a year — the law is moving faster than annual training cycles.",
+      "Stand up a lightweight, named legal review path for AI-assisted Reels and refresh the team's IP-and-AI training at least twice a year, the law is moving faster than annual training cycles.",
   },
 ];
 
+// Trimmed to one statement per dimension (10 total) for a fast team check.
+// The richer, multi-question detail lives in the per-Reel "Check a Reel" flow.
 export const questions: Question[] = [
-  // Autonomy
+  // Authenticity
   {
     id: "q-autonomy-1",
     dimensionId: "autonomy",
-    text: "A human on our team has final editorial control over every AI-generated Reel before it is published.",
+    text: "A human on our team keeps real creative control over AI-generated Reels, reviewing and reworking output rather than shipping it as-is.",
   },
-  {
-    id: "q-autonomy-2",
-    dimensionId: "autonomy",
-    text: "When AI suggests a creative choice we disagree with, the team overrides it without friction.",
-  },
-
-  // Human craft
   {
     id: "q-craft-1",
     dimensionId: "human-craft",
-    text: "Our AI-assisted Reels contain something visibly human-made — a face, a performance, hand-shot footage — in the first few seconds.",
+    text: "Our AI-assisted Reels contain something visibly human-made (a face, a performance, hand-shot footage) in the first few seconds.",
   },
-  {
-    id: "q-craft-2",
-    dimensionId: "human-craft",
-    text: "A Gen Z viewer can tell that real people were involved in producing the Reel.",
-  },
-
-  // Original creativity
   {
     id: "q-creativity-1",
     dimensionId: "original-creativity",
-    text: "Our Reels start from an original brand idea rather than from an AI-generated concept.",
+    text: "Our Reels start from a distinctive brand idea and use AI to execute it, rather than starting from a generic AI-default concept.",
   },
-  {
-    id: "q-creativity-2",
-    dimensionId: "original-creativity",
-    text: "We push back on AI's first outputs and rework them until they are distinctive to our brand.",
-  },
-
-  // Use-case fit
   {
     id: "q-usecase-1",
     dimensionId: "use-case-fit",
     text: "When we use GAI in a Reel, the team can articulate in one sentence why AI was the right tool for that specific Reel.",
   },
 
-  // Nonbiasedness
+  // Bias
   {
     id: "q-nonbias-1",
     dimensionId: "nonbiasedness",
-    text: "Every AI-generated Reel is checked for visible stereotypes and exclusion before it is published.",
+    text: "Every AI-generated Reel is checked for visible stereotypes and exclusion (who is shown, who is missing, who is othered) before it is published.",
   },
-  {
-    id: "q-nonbias-2",
-    dimensionId: "nonbiasedness",
-    text: "The representation in our final Reels output reflects the diversity we want to be associated with as a brand.",
-  },
-
-  // Critical thinking
   {
     id: "q-critical-1",
     dimensionId: "critical-thinking",
-    text: "Our team interrogates AI outputs rather than accepting them at face value.",
+    text: "We interrogate our own briefings and prompts for bias, not just the AI's output.",
   },
-  {
-    id: "q-critical-2",
-    dimensionId: "critical-thinking",
-    text: "Junior team members feel empowered to flag bias in AI outputs or in our own briefings.",
-  },
-  {
-    id: "q-critical-3",
-    dimensionId: "critical-thinking",
-    text: "We actively examine what biases our own briefings and prompts may be introducing into the AI.",
-  },
-
-  // Brand-audience fit
   {
     id: "q-baf-1",
     dimensionId: "brand-audience-fit",
     text: "Our AI-generated Reels reflect the lived reality of the specific Gen Z segment we are targeting.",
   },
-  {
-    id: "q-baf-2",
-    dimensionId: "brand-audience-fit",
-    text: "We test AI-generated Reels with people from the target audience before publishing.",
-  },
 
-  // Triple-C
+  // IP
   {
     id: "q-triplec-1",
     dimensionId: "crediting",
-    text: "We disclose AI involvement clearly on Reels where it materially shaped what the viewer sees.",
+    text: "We handle credit, consent and compensation together as one practice for AI-assisted Reels, not as an optional disclosure tick-box.",
   },
-  {
-    id: "q-triplec-2",
-    dimensionId: "crediting",
-    text: "We obtain explicit consent from anyone whose likeness, voice or style informs AI-generated material in our Reels.",
-  },
-  {
-    id: "q-triplec-3",
-    dimensionId: "crediting",
-    text: "We fairly compensate creators whose style or work informs our AI-generated Reels output.",
-  },
-
-  // Creator collaboration
   {
     id: "q-collab-1",
     dimensionId: "creator-collaboration",
-    text: "Named creators are visibly involved in our AI-assisted Reels — not just behind the scenes.",
+    text: "Named creators are visibly involved in our AI-assisted Reels, not just behind the scenes.",
   },
-
-  // Provenance
   {
     id: "q-prov-1",
     dimensionId: "provenance",
-    text: "We can trace the source of training data and tooling behind the AI-generated assets in our Reels.",
+    text: "We can trace and disclose the source of the training data and tooling behind the AI-generated assets in our Reels.",
   },
-  {
-    id: "q-prov-2",
-    dimensionId: "provenance",
-    text: "If a journalist or regulator asked us to show what trained the AI behind a specific Reel, we could.",
-  },
-
-  // Legal guardrails
   {
     id: "q-legal-1",
     dimensionId: "legal-guardrails",
     text: "An established internal legal or compliance path reviews AI-generated Reels before they ship.",
-  },
-  {
-    id: "q-legal-2",
-    dimensionId: "legal-guardrails",
-    text: "Our team is current on copyright and IP rules that affect AI-generated content.",
   },
 ];
 

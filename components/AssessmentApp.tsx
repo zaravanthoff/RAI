@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { sections } from "@/data/assessment";
+import type { ReelAnswers } from "@/data/reelCheck";
 import {
   isAssessmentComplete,
   isSectionComplete,
@@ -10,28 +11,40 @@ import {
   type Answer,
   type Answers,
 } from "@/lib/scoring";
-import { clearState, loadState, saveState } from "@/lib/storage";
-import { Hero } from "./Hero";
+import { scoreReel } from "@/lib/reelScoring";
+import { clearState, loadState, saveState, type Mode } from "@/lib/storage";
+import { Landing } from "./Landing";
+import { Research } from "./research/Research";
 import { SectionCard } from "./SectionCard";
 import { ProgressBar } from "./ProgressBar";
 import { ResultsDashboard } from "./ResultsDashboard";
+import { ReelFlow } from "./reel/ReelFlow";
+import { ReelResults } from "./reel/ReelResults";
 
-type Stage = "landing" | "assessment" | "results";
+type Stage =
+  | "landing"
+  | "research"
+  | "team"
+  | "team-results"
+  | "reel"
+  | "reel-results";
 
 const TOTAL_STEPS = sections.length;
 
 export function AssessmentApp() {
   const [stage, setStage] = useState<Stage>("landing");
-  const [step, setStep] = useState(0); // 0..TOTAL_STEPS-1
+  const [step, setStep] = useState(0); // team: 0..TOTAL_STEPS-1
   const [answers, setAnswers] = useState<Answers>({});
+  const [reelAnswers, setReelAnswers] = useState<ReelAnswers>({});
   const [hydrated, setHydrated] = useState(false);
-  const sectionTopRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
 
   // Hydrate from localStorage on mount
   useEffect(() => {
     const saved = loadState();
     if (saved) {
       setAnswers(saved.answers ?? {});
+      setReelAnswers(saved.reelAnswers ?? {});
       setStep(Math.min(Math.max(saved.step ?? 0, 0), TOTAL_STEPS - 1));
     }
     setHydrated(true);
@@ -40,24 +53,37 @@ export function AssessmentApp() {
   // Persist on change (after hydration)
   useEffect(() => {
     if (!hydrated) return;
-    saveState({ answers, step, updatedAt: new Date().toISOString() });
-  }, [answers, step, hydrated]);
+    saveState({
+      answers,
+      reelAnswers,
+      step,
+      updatedAt: new Date().toISOString(),
+    });
+  }, [answers, reelAnswers, step, hydrated]);
 
-  const hasInProgress = useMemo(
+  const teamInProgress = useMemo(
     () => Object.values(answers).some((v) => v !== null && v !== undefined),
     [answers],
   );
+  const reelInProgress = useMemo(
+    () => Object.keys(reelAnswers).length > 0,
+    [reelAnswers],
+  );
 
-  const handleAnswer = (qid: string, value: Answer) => {
-    setAnswers((prev) => ({ ...prev, [qid]: value }));
-  };
+  const scrollTop = () =>
+    requestAnimationFrame(() =>
+      topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
 
   const goTo = (s: Stage, stepIndex?: number) => {
     setStage(s);
     if (typeof stepIndex === "number") setStep(stepIndex);
-    requestAnimationFrame(() => {
-      sectionTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    scrollTop();
+  };
+
+  const selectMode = (mode: Mode) => {
+    if (mode === "reel") goTo("reel");
+    else goTo("team", teamInProgress ? step : 0);
   };
 
   const currentSection = sections[step];
@@ -65,42 +91,78 @@ export function AssessmentApp() {
   const currentComplete = currentSection
     ? isSectionComplete(currentSection.id, answers)
     : false;
-  const result = useMemo(() => scoreAssessment(answers), [answers]);
+  const teamResult = useMemo(() => scoreAssessment(answers), [answers]);
+  const reelResult = useMemo(() => scoreReel(reelAnswers), [reelAnswers]);
 
+  // ── Landing ────────────────────────────────────────────────────
   if (stage === "landing") {
     return (
-      <main>
-        <Hero
-          hasInProgress={hasInProgress}
-          onStart={() => goTo("assessment", hasInProgress ? step : 0)}
+      <Landing
+        onSelect={selectMode}
+        onResearch={() => goTo("research")}
+        reelInProgress={reelInProgress}
+        teamInProgress={teamInProgress}
+        onClear={() => {
+          clearState();
+          setAnswers({});
+          setReelAnswers({});
+          setStep(0);
+        }}
+      />
+    );
+  }
+
+  // ── Research ───────────────────────────────────────────────────
+  if (stage === "research") {
+    return (
+      <>
+        <div ref={topRef} />
+        <Research onBack={() => goTo("landing")} />
+      </>
+    );
+  }
+
+  // ── Reel checker ───────────────────────────────────────────────
+  if (stage === "reel") {
+    return (
+      <>
+        <div ref={topRef} />
+        <ReelFlow
+          answers={reelAnswers}
+          onAnswer={(qid, value) =>
+            setReelAnswers((prev) => ({ ...prev, [qid]: value }))
+          }
+          onComplete={() => goTo("reel-results")}
+          onExit={() => goTo("landing")}
         />
-        <StudyExplainer />
-        {hasInProgress && (
-          <div className="mx-auto max-w-3xl px-5 pb-16 text-center sm:px-8">
-            <button
-              type="button"
-              onClick={() => {
-                clearState();
-                setAnswers({});
-                setStep(0);
-              }}
-              className="text-xs uppercase tracking-[0.16em] text-[var(--color-ink-soft)]/60 underline-offset-4 hover:text-[var(--color-syrah)] hover:underline"
-            >
-              Or start over with a clean assessment
-            </button>
-          </div>
-        )}
+      </>
+    );
+  }
+
+  if (stage === "reel-results") {
+    return (
+      <main>
+        <div ref={topRef} />
+        <ReelResults
+          result={reelResult}
+          onRestart={() => {
+            setReelAnswers({});
+            goTo("reel");
+          }}
+          onTeamMode={() => goTo("team", 0)}
+        />
       </main>
     );
   }
 
-  if (stage === "results") {
+  // ── Team results ───────────────────────────────────────────────
+  if (stage === "team-results") {
     return (
       <main>
+        <div ref={topRef} />
         <ResultsDashboard
-          result={result}
+          result={teamResult}
           onRestart={() => {
-            clearState();
             setAnswers({});
             setStep(0);
             goTo("landing");
@@ -110,18 +172,20 @@ export function AssessmentApp() {
     );
   }
 
-  // assessment stage
+  // ── Team assessment ────────────────────────────────────────────
   return (
     <main className="min-h-screen pb-24">
       <ProgressBar step={step} total={TOTAL_STEPS} fraction={fraction} />
 
-      <div ref={sectionTopRef} />
+      <div ref={topRef} />
 
       <div className="mx-auto max-w-4xl px-4 pt-10 sm:px-8">
         <SectionCard
           section={currentSection}
           answers={answers}
-          onAnswer={handleAnswer}
+          onAnswer={(qid: string, value: Answer) =>
+            setAnswers((prev) => ({ ...prev, [qid]: value }))
+          }
         />
 
         <nav className="no-print mt-8 flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -129,17 +193,17 @@ export function AssessmentApp() {
             type="button"
             onClick={() => {
               if (step === 0) goTo("landing");
-              else goTo("assessment", step - 1);
+              else goTo("team", step - 1);
             }}
             className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--color-skyway)] bg-white px-5 py-3 text-sm text-[var(--color-ink-soft)] transition hover:border-[var(--color-syrah)] hover:text-[var(--color-syrah)]"
           >
-            ← {step === 0 ? "Back to intro" : `Section ${step}`}
+            ← {step === 0 ? "Back to start" : `Section ${step}`}
           </button>
 
           <div className="flex flex-col items-end gap-2 sm:items-end">
             {!currentComplete && (
               <p className="text-xs text-[var(--color-ink-soft)]/70">
-                Tip: every question needs an answer or a "Not sure".
+                Tip: every question needs an answer or a &quot;Not sure&quot;.
               </p>
             )}
             <button
@@ -147,9 +211,9 @@ export function AssessmentApp() {
               disabled={!currentComplete}
               onClick={() => {
                 if (step === TOTAL_STEPS - 1) {
-                  if (isAssessmentComplete(answers)) goTo("results");
+                  if (isAssessmentComplete(answers)) goTo("team-results");
                 } else {
-                  goTo("assessment", step + 1);
+                  goTo("team", step + 1);
                 }
               }}
               className={[
@@ -159,60 +223,14 @@ export function AssessmentApp() {
                   : "cursor-not-allowed bg-[var(--color-skyway)]/60 text-white/70",
               ].join(" ")}
             >
-              {step === TOTAL_STEPS - 1 ? "See my results" : `Next: ${sections[step + 1].title}`}
+              {step === TOTAL_STEPS - 1
+                ? "See my results"
+                : `Next: ${sections[step + 1].title}`}
               <span aria-hidden>→</span>
             </button>
           </div>
         </nav>
       </div>
     </main>
-  );
-}
-
-function StudyExplainer() {
-  return (
-    <section className="mx-auto max-w-5xl px-5 py-20 sm:px-8 sm:py-24">
-      <div className="grid gap-10 md:grid-cols-[1fr,1.4fr]">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-syrah)]">
-            Why this exists
-          </p>
-          <h2 className="font-display mt-3 text-3xl text-balance text-[var(--color-syrah-deep)] sm:text-4xl">
-            The trust problem is not in the AI. It's in the practice around it.
-          </h2>
-        </div>
-        <div className="space-y-4 text-[15px] leading-relaxed text-[var(--color-ink-soft)] sm:text-base">
-          <p>
-            Across all three sub-questions in the underlying study, the same pattern emerged:
-            the literature located the trust problem in a property of the AI — autonomy,
-            nonbiasedness, crediting — while the data located it in the practices that brands
-            put around the AI.
-          </p>
-          <p>
-            This instrument operationalises that finding. It scores your team against the
-            three RAI capabilities from the literature <em>and</em> the seven moderators that
-            emerged from the interviews. Five of those reached the study's critical
-            threshold — they are weighted more heavily here.
-          </p>
-        </div>
-      </div>
-
-      <ol className="mt-14 grid gap-5 md:grid-cols-3">
-        {sections.map((s) => (
-          <li
-            key={s.id}
-            className="rounded-3xl bg-white p-6 shadow-[0_30px_80px_-50px_rgba(31,53,81,0.25)] ring-1 ring-black/5"
-          >
-            <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink-soft)]/60">
-              SQ {s.number} · {s.capability}
-            </p>
-            <h3 className="font-display mt-2 text-2xl text-[var(--color-syrah-deep)]">
-              {s.title}
-            </h3>
-            <p className="mt-2 text-sm text-[var(--color-ink-soft)]">{s.subtitle}</p>
-          </li>
-        ))}
-      </ol>
-    </section>
   );
 }

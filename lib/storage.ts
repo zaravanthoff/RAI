@@ -1,10 +1,15 @@
 import type { Answers } from "./scoring";
+import type { ReelAnswers } from "@/data/reelCheck";
 
-const KEY = "rai-reels-assessment-v1";
+const KEY = "rai-reels-assessment-v2";
+
+export type Mode = "reel" | "team";
 
 export interface SavedState {
-  answers: Answers;
-  step: number;
+  mode?: Mode | null;
+  answers: Answers; // team mode
+  step: number; // team mode
+  reelAnswers?: ReelAnswers;
   updatedAt: string;
 }
 

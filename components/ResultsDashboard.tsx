@@ -5,7 +5,7 @@ import type { AssessmentResult, DimensionScore } from "@/lib/scoring";
 import { ResultsRadar } from "./ResultsRadar";
 
 const fmt = (n: number | null) =>
-  n === null ? "—" : Math.round(n).toString();
+  n === null ? "–" : Math.round(n).toString();
 
 function bandColor(key?: string) {
   switch (key) {
@@ -62,7 +62,7 @@ export function ResultsDashboard({
       <section className="mt-12 grid gap-8 lg:grid-cols-[1.05fr,1fr]">
         <div className="animate-rise-delay-1 rounded-3xl bg-white p-5 shadow-[0_30px_80px_-50px_rgba(31,53,81,0.35)] ring-1 ring-black/5 sm:p-7">
           <h2 className="font-display text-2xl text-[var(--color-syrah-deep)]">
-            Across the 10 dimensions
+            Across the dimensions
           </h2>
           <p className="mt-1 text-sm text-[var(--color-ink-soft)]">
             <span className="inline-flex items-center gap-1.5">

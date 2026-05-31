@@ -30,7 +30,7 @@ export function LikertInput({
               type="button"
               role="radio"
               aria-checked={selected}
-              aria-label={`${opt.label} — ${opt.help}`}
+              aria-label={`${opt.label}, ${opt.help}`}
               onClick={() => onChange(opt.value)}
               className={[
                 "group flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl border px-2 py-3 text-center transition sm:py-4",
@@ -65,7 +65,7 @@ export function LikertInput({
               ? "border-[var(--color-blue-opal)] bg-[var(--color-blue-opal)] text-white"
               : "border-[var(--color-skyway)]/60 text-[var(--color-ink-soft)] hover:border-[var(--color-blue-opal)] hover:text-[var(--color-blue-opal)]",
           ].join(" ")}
-          aria-label={`${name} — Not sure (excluded from score)`}
+          aria-label={`${name}, Not sure (excluded from score)`}
         >
           Not sure
         </button>

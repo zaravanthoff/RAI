@@ -1,26 +1,35 @@
-# RAI-in-Reels Assessment Tool — PRD
+# RAI-in-Reels Tool — PRD
 
-A self-assessment instrument for marketing teams to evaluate their Generative-AI use in Instagram Reels against the emergent moderators identified in the study.
+A practical instrument for marketing teams to check whether their Generative-AI use in Instagram Reels protects Gen Z brand trust, grounded in the emergent moderators identified in the study.
 
-This is the working tool referenced in the thesis Conclusion ("Appendix X") and operationalises the finding that responsible AI in Reels is a property of *marketer behaviour*, not of the AI system itself.
+This is the working tool referenced in the thesis Conclusion and operationalises the finding that responsible AI in Reels is a property of *marketer behaviour*, not of the AI system itself.
 
 ---
+
+## 0. Two modes
+
+The tool opens on a mode selector with two ways in:
+
+- **Check a Reel** (primary). An adaptive, branching diagnostic of **one specific** AI-assisted Reel or ad. A few framing questions (funnel stage, what AI generated, brand promise) decide which of the study's levers are even relevant, so the marketer only answers what applies (≈4–15 questions). The output leads with a **publish / caution / rework verdict**, the **top risks**, and a **concrete fix-it checklist** — then a small three-bar dashboard and the study's contextual contradictions (authenticity paradox, IP indifference) as callouts.
+- **Assess our team** (secondary). The team-maturity self-assessment described below, trimmed to **one statement per dimension** for a faster read, producing the readiness score + radar.
+
+Sections 1–8 below describe the **team-assessment** mode. The Reel checker is specified in `data/reelCheck.ts` (question graph + branching predicates + per-lever risk/fix copy) and `lib/reelScoring.ts` (verdict logic).
 
 ## 1. Goal
 
 Give marketing teams a concrete, fast (≤5 min) instrument to:
 
-1. Score their current GAI-in-Reels practice across the seven emergent moderators.
-2. See where they are strong and where they are weak relative to the critical-threshold themes from the study.
-3. Get tailored, study-grounded recommendations for the weakest dimensions.
+1. Diagnose a specific Reel — or score current team practice — across the study's moderators.
+2. See where they are strong and where they are weak relative to the critical-threshold themes.
+3. Get tailored, study-grounded, **actionable** guidance for the weakest dimensions.
 
 Non-goal: replicate the literature's framing of RAI as built-in AI capabilities. The whole point of the study's contribution is that RAI is enacted in practice, so the tool measures **practices**, not AI specs.
 
 ## 2. Target user
 
-Marketing professionals at consumer-facing corporations producing AI-assisted Reels for Gen Z. Used solo by a marketer, or in a team workshop. No login, no backend — works offline once loaded.
+Marketing professionals at consumer-facing corporations producing AI-assisted Reels for Gen Z. Used solo by a marketer (to vet a Reel before publishing), or in a team workshop. No login, no backend — works offline once loaded.
 
-## 3. Assessment structure
+## 3. Team-assessment structure
 
 Three sections mirror the thesis sub-questions. Each section assesses one RAI capability from the literature plus the emergent moderators that surfaced around it. Critical-threshold moderators (those that crossed the study's evidence bar) are weighted more heavily in scoring.
 
@@ -52,7 +61,7 @@ Three sections mirror the thesis sub-questions. Each section assesses one RAI ca
 
 ## 4. Questions
 
-~20 statements total, ~2 per dimension. Each scored on a 5-point Likert scale:
+One statement per dimension (11 total) for a fast team read. Each scored on a 5-point Likert scale:
 
 1 — Never / Not in place
 2 — Rarely / Ad hoc
@@ -78,7 +87,7 @@ Full question list lives in `data/questions.ts` — drafted in the build, review
 ## 6. Output (results screen)
 
 1. **Headline score** with band label and one-sentence interpretation.
-2. **Radar chart** across all 10 dimensions — the 3 RAI capabilities from the literature (autonomy, nonbiasedness, crediting) **and** the 7 emergent moderators. Critical-threshold dimensions are visually marked on the radar so the user can tell at a glance which axes carry the strongest evidence.
+2. **Radar chart** across the 7 emergent moderators (the literature capabilities — autonomy / nonbiasedness / crediting — appear in the per-section breakdown but not the radar, because the study's contribution is the emergent moderators).
 3. **Per-section breakdown:** for each of the three sub-question areas, show the section score, top strength, and biggest gap.
 4. **Recommendations:** the three lowest-scoring dimensions each get a tailored 2–3 sentence recommendation drawn from the study's findings.
 5. **Print / export to PDF** via browser print stylesheet (no backend).
