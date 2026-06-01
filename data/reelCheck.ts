@@ -116,7 +116,7 @@ export const reelQuestions: ReelQuestion[] = [
     id: "ctx-funnel",
     kind: "context",
     prompt: "Where does this Reel sit in your funnel?",
-    help: "The study found AI is tolerated, even welcomed, in lower-funnel work, but carries a much steeper trust penalty in upper-funnel brand-building.",
+    help: "The study found that audiences accept, even welcome, AI in lower-funnel content, but trust it far less in upper-funnel brand-building.",
     options: [
       {
         id: "upper",
@@ -133,8 +133,8 @@ export const reelQuestions: ReelQuestion[] = [
     id: "ctx-ai",
     kind: "context",
     multi: true,
-    prompt: "What did AI actually generate in this Reel?",
-    help: "Select everything that applies. This decides which trust risks are even relevant to your Reel.",
+    prompt: "What did AI generate in this Reel?",
+    help: "Your answer here decides which trust risks apply to this Reel.",
     options: [
       { id: "people", label: "People, faces or characters" },
       { id: "voice", label: "Voice or spoken audio" },
@@ -149,8 +149,8 @@ export const reelQuestions: ReelQuestion[] = [
     id: "ctx-promise",
     kind: "context",
     prompt:
-      "Does your brand explicitly position itself on being human, real, authentic or natural?",
-    help: "R5's telecom example: a brand that promises to be 'human' undermines itself if its Reels don't show that. A nature brand using AI triggers 'a kind of error'.",
+      "Does your brand explicitly position itself as human, real, authentic or natural?",
+    help: "In the study, a telecom brand that promises to be 'human' undermined itself when its Reels didn't show that, and a nature brand using AI triggered what one marketer called 'a kind of error'.",
     options: [
       { id: "yes", label: "Yes, that's core to how we position the brand" },
       { id: "somewhat", label: "Somewhat, it's part of the mix" },
@@ -170,7 +170,7 @@ export const reelQuestions: ReelQuestion[] = [
     critical: true,
     prompt:
       "Is there something visibly human in this Reel that a viewer would notice in the first few seconds (a real face, a real performance, hand-shot footage)?",
-    help: "Visible human work was the strongest way to keep a Reel feeling authentic in the study.",
+    help: "In the study, visible human work was the single strongest way to keep a Reel feeling authentic.",
     options: yesPartlyNo(
       "Yes, clearly human-made elements are front and centre",
       "A little, but it's subtle or buried",
@@ -190,7 +190,7 @@ export const reelQuestions: ReelQuestion[] = [
       "A distinctive idea that came from your team, not a generic AI default.",
     critical: true,
     prompt: "Where did the core creative idea come from?",
-    help: "R8: 'If the creative idea is good, nobody cares how it was made.' A strong idea overrides production-method concerns; a generic AI-default concept amplifies them.",
+    help: "As one founder put it: 'If the creative idea is good, nobody cares how it was made.' A strong idea outweighs any worry about how it was produced; a generic, AI-default concept only makes that worry worse.",
     options: [
       {
         id: "human",
@@ -223,7 +223,7 @@ export const reelQuestions: ReelQuestion[] = [
     critical: false,
     prompt:
       "Did a human stay in charge of the AI, reviewing and reworking its output instead of accepting it as-is?",
-    help: "AI can't judge what's good, so a marketer has to give the direction. As one founder put it: 'AI has no clue what good looks like.'",
+    help: "AI can't judge what's good, so the marketer has to set the direction. As one founder put it: 'AI has no clue what good looks like.'",
     options: yesPartlyNo(
       "Yes, a human directed and reworked it",
       "Some review, but largely as the AI produced it",
@@ -246,7 +246,7 @@ export const reelQuestions: ReelQuestion[] = [
     critical: true,
     prompt:
       "Did you check your own brief and prompts for bias, not just the AI's output?",
-    help: "Bias usually comes from the brief and the data you feed in, not the AI itself. So check your own inputs first.",
+    help: "Bias usually comes from the brief and the data you feed in, not from the AI itself, so check your own inputs first.",
     options: [
       {
         id: "yes",
@@ -275,7 +275,7 @@ export const reelQuestions: ReelQuestion[] = [
     critical: false,
     prompt:
       "Did you check the finished cut for who's shown, who's missing, and any stereotypes?",
-    help: "AI tools repeat the patterns in their training data. One team re-prompted again and again until the people shown matched the world they wanted to represent.",
+    help: "AI tools repeat the patterns in their training data. One team re-prompted repeatedly until the people shown matched the world they wanted to represent.",
     options: yesPartlyNo(
       "Yes, we ran a deliberate representation check",
       "A quick glance, nothing systematic",
@@ -341,7 +341,7 @@ export const reelQuestions: ReelQuestion[] = [
       "Telling viewers that AI was used where it shaped what they see.",
     critical: false,
     prompt:
-      "Is the AI use labelled or disclosed where it shaped what viewers see?",
+      "Is AI use labelled or disclosed wherever it shaped what viewers see?",
     help: "If a brand hides its AI use and viewers later find out, it can backfire. Disclosure is the first step in using AI fairly.",
     options: yesPartlyNo(
       "Yes, it's clearly disclosed",
@@ -362,7 +362,7 @@ export const reelQuestions: ReelQuestion[] = [
       "Getting permission from anyone whose face, voice or style the AI is based on.",
     critical: false,
     prompt:
-      "Did everyone whose face, voice or style the AI is based on agree to it?",
+      "Did you get consent from everyone whose face, voice or style the AI is based on?",
     help: "Using a real person's face, voice or signature style without asking isn't okay, even through AI. As one founder put it: 'if you are a photographer, artist, voice actor and you are suddenly used without consent, that is not okay.'",
     options: withNA(
       yesPartlyNo(
@@ -409,7 +409,7 @@ export const reelQuestions: ReelQuestion[] = [
     critical: true,
     prompt:
       "Can you trace which tool and data source produced the AI assets in this Reel?",
-    help: "Brands that want to look ethical should use tools trained on licensed data, like Adobe Firefly or Shutterstock, that let you trace where the content came from.",
+    help: "Brands that want to stay defensible use tools trained on licensed data (like Adobe Firefly or Shutterstock) that let you trace where the content came from.",
     options: yesPartlyNo(
       "Yes, we can trace tool and sourcing",
       "Partly, we know the tool but not the data",

@@ -3,13 +3,14 @@ import type { ReelAnswers } from "@/data/reelCheck";
 
 const KEY = "rai-reels-assessment-v2";
 
-export type Mode = "reel" | "team";
+export type Mode = "reel" | "team" | "plan";
 
 export interface SavedState {
   mode?: Mode | null;
   answers: Answers; // team mode
   step: number; // team mode
   reelAnswers?: ReelAnswers;
+  planAnswers?: ReelAnswers; // plan mode (shares the framing-question shape)
   updatedAt: string;
 }
 

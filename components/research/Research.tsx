@@ -37,11 +37,11 @@ export function Research({ onBack }: { onBack: () => void }) {
           <section className="reveal mt-8">
             <p className="eyebrow text-[var(--color-syrah)]">The research behind this tool</p>
             <h1 className="font-display mt-3 text-balance text-[2rem] leading-[1.06] text-[var(--color-syrah-deep)] sm:text-4xl">
-              Responsible AI is something marketers do, not something the AI has.
+              Responsible AI is something marketers do, not a property of the AI.
             </h1>
             <div className="mt-5 space-y-4 text-[15px] leading-relaxed text-[var(--color-ink-soft)]">
               <p>
-                This tool is built on a master&apos;s study into how marketing professionals
+                This tool is built on a master&apos;s study of how marketing professionals
                 can use Generative AI responsibly in Instagram Reels without losing Gen Z&apos;s
                 trust. Eleven in-depth interviews (with people at companies including TBWA, ACT
                 Agency and Odido) tested a model with three trust challenges, each potentially

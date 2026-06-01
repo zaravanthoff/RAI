@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 
 /**
  * Interactive recreation of the thesis conceptual model as a scalable SVG
@@ -105,8 +106,131 @@ interface Hover {
   below: boolean;
 }
 
+/**
+ * Guided walkthrough. Each step spotlights one part of the model (dimming the
+ * rest) and narrates the flow: source → three challenges → each challenge's
+ * moderators (calling out the emergent ones) → counter-voices → outcome.
+ * `active` tokens: "source", "outcome", "ch:<lane>", "con:<lane>", or
+ * "mods:<lane>" (matches every moderator pill in that lane).
+ */
+interface TourStep {
+  title: string;
+  body: string;
+  active: string[];
+}
+
+const LANE_INTRO: Record<LaneId, { n: number; body: string; softens: string }> = {
+  authenticity: {
+    n: 1,
+    body: "When AI makes a Reel feel less genuine, Gen Z can trust the brand less. This was the challenge closest to respondents' daily work — it came up in every interview.",
+    softens: "Four moderators can soften this. The one marked ★ comes from the literature; the other three emerged from the interviews. Here's each in turn.",
+  },
+  bias: {
+    n: 2,
+    body: "AI can reproduce stereotypes and blind spots — defaulting to one ethnicity, or missing Ramadan or a regional identity.",
+    softens: "Three moderators can soften this. The one marked ★ comes from the literature; the other two emerged from the interviews. Here's each in turn.",
+  },
+  ip: {
+    n: 3,
+    body: "AI trained on other people's work raises questions of credit, consent and compensation — about whose work and likeness it draws on.",
+    softens: "Four moderators can soften this. The one marked ★ comes from the literature; the other three emerged from the interviews. Here's each in turn.",
+  },
+};
+
+// Build the walkthrough from the model data so moderator copy stays in one place:
+// source → 3 challenges → (per lane: challenge → each moderator → counter-voice) → outcome.
+function buildTour(): TourStep[] {
+  const steps: TourStep[] = [
+    {
+      title: "Where it all starts",
+      body: "The whole model starts from a single point: a brand using Generative AI to make Instagram Reels for a Gen Z audience.",
+      active: ["source"],
+    },
+    {
+      title: "Three challenges to trust",
+      body: "Using AI this way raises three distinct challenges — reduced authenticity, algorithmic bias and IP concerns. Each one can chip away at brand trust.",
+      active: ["ch:authenticity", "ch:bias", "ch:ip"],
+    },
+  ];
+
+  for (const lane of LANES) {
+    const intro = LANE_INTRO[lane.id];
+    steps.push({
+      title: `${intro.n} · ${lane.challenge}`,
+      body: intro.body,
+      active: [`ch:${lane.id}`],
+    });
+    steps.push({
+      title: "What can soften it",
+      body: intro.softens,
+      active: [`mods:${lane.id}`],
+    });
+    for (const m of lane.mods) {
+      steps.push({
+        title: `${m.label} · ${m.theorised ? "from the literature ★" : "emergent (from interviews)"}`,
+        body: m.tip,
+        active: [`mod:${lane.id}:${m.label}`],
+      });
+    }
+    steps.push({
+      title: "The counter-voice",
+      body: lane.contradictionTip,
+      active: [`con:${lane.id}`],
+    });
+  }
+
+  steps.push({
+    title: "It all lands here",
+    body: "Each challenge, softened or not by these moderators, flows into the outcome the whole model explains: Gen Z brand trust. The takeaway — trust is driven by the practices brands put around the AI, not by AI use itself.",
+    active: ["outcome", "ch:authenticity", "ch:bias", "ch:ip"],
+  });
+
+  return steps;
+}
+
+const TOUR: TourStep[] = buildTour();
+
+const MIN_WIDTH = 480; // px — narrowest the card can be dragged
+
 export function ConceptualModel() {
   const [hover, setHover] = useState<Hover | null>(null);
+  const [cardWidth, setCardWidth] = useState<number | null>(null);
+  const [tourStep, setTourStep] = useState<number | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const draggingRef = useRef(false);
+
+  // ── Walkthrough ──────────────────────────────────────────────────────────
+  const tourActive = tourStep !== null;
+  const step = tourActive ? TOUR[tourStep] : null;
+  const isSpot = (id: string) =>
+    !!step &&
+    step.active.some(
+      (tok) =>
+        tok === id ||
+        (tok.startsWith("mods:") && id.startsWith(`mod:${tok.slice(5)}:`)),
+    );
+  const inStep = (tok: string) => !!step && step.active.includes(tok);
+  const connOpacity = (bright: boolean) =>
+    tourActive ? (bright ? 1 : 0.08) : 1;
+  const startTour = () => {
+    setHover(null);
+    setTourStep(0);
+  };
+  const exitTour = () => setTourStep(null);
+  const nextStep = () =>
+    setTourStep((s) => (s === null ? 0 : Math.min(s + 1, TOUR.length - 1)));
+  const prevStep = () =>
+    setTourStep((s) => (s === null ? 0 : Math.max(s - 1, 0)));
+
+  const onResizeMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (!draggingRef.current || !cardRef.current) return;
+    // Card stays centred, so it grows symmetrically: the right edge tracks the
+    // cursor while the centre (the page midpoint) stays fixed.
+    const rect = cardRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const max = window.innerWidth - 32;
+    setCardWidth(Math.min(max, Math.max(MIN_WIDTH, 2 * (e.clientX - centerX))));
+  };
 
   const enter = (tip: string, cx: number, cy: number) =>
     setHover({
@@ -118,14 +242,47 @@ export function ConceptualModel() {
   const leave = () => setHover(null);
 
   return (
-    <div className="rounded-3xl bg-white p-4 ring-1 ring-black/5 sm:p-6">
+    <div
+      ref={cardRef}
+      className="relative rounded-3xl bg-white p-4 ring-1 ring-black/5 sm:p-6"
+      style={
+        cardWidth != null
+          ? { width: cardWidth, left: "50%", transform: "translateX(-50%)" }
+          : undefined
+      }
+    >
+      <div className="mb-3 flex items-center justify-between gap-3">
+        {!tourActive ? (
+          <button
+            type="button"
+            onClick={startTour}
+            className="lift group inline-flex items-center gap-2 rounded-full bg-[var(--color-syrah)] px-4 py-2 text-sm font-medium text-white shadow-[0_14px_30px_-16px_rgba(110,41,52,0.8)] transition hover:bg-[var(--color-syrah-deep)]"
+          >
+            <span
+              aria-hidden
+              className="grid size-5 place-items-center rounded-full bg-white/20 text-[10px] transition group-hover:bg-white/30"
+            >
+              ▶
+            </span>
+            Walk through the model
+          </button>
+        ) : (
+          <span className="eyebrow text-[var(--color-syrah)]">
+            Guided walkthrough
+          </span>
+        )}
+        <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink-soft)]/45">
+          <span aria-hidden>↔</span> Drag the right edge to resize
+        </span>
+      </div>
+
       <div className="relative w-full">
-        <svg
-          viewBox={`0 0 ${VW} ${VH}`}
-          className="block h-auto w-full"
-          role="img"
-          aria-label="Conceptual model: three trust challenges flowing into Gen Z brand trust"
-        >
+          <svg
+            viewBox={`0 0 ${VW} ${VH}`}
+            className="block h-auto w-full"
+            role="img"
+            aria-label="Conceptual model: three trust challenges flowing into Gen Z brand trust"
+          >
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 z" fill="#5b5560" />
@@ -147,6 +304,10 @@ export function ConceptualModel() {
               strokeWidth={2}
               strokeDasharray="6 5"
               markerEnd="url(#arrow)"
+              style={{
+                opacity: connOpacity(inStep("source") || isSpot(`ch:${lane.id}`)),
+                transition: "opacity 0.45s ease",
+              }}
             />
           ))}
 
@@ -160,10 +321,31 @@ export function ConceptualModel() {
               y2={lane.y}
               stroke="#5b5560"
               strokeWidth={2}
+              style={{
+                opacity: connOpacity(inStep("outcome")),
+                transition: "opacity 0.45s ease",
+              }}
             />
           ))}
-          <line x1={BUS_X} y1={LANES[0].y} x2={BUS_X} y2={LANES[2].y} stroke="#5b5560" strokeWidth={2} />
-          <line x1={BUS_X} y1={300} x2={TRUST.x} y2={300} stroke="#5b5560" strokeWidth={2} markerEnd="url(#arrow)" />
+          <line
+            x1={BUS_X}
+            y1={LANES[0].y}
+            x2={BUS_X}
+            y2={LANES[2].y}
+            stroke="#5b5560"
+            strokeWidth={2}
+            style={{ opacity: connOpacity(inStep("outcome")), transition: "opacity 0.45s ease" }}
+          />
+          <line
+            x1={BUS_X}
+            y1={300}
+            x2={TRUST.x}
+            y2={300}
+            stroke="#5b5560"
+            strokeWidth={2}
+            markerEnd="url(#arrow)"
+            style={{ opacity: connOpacity(inStep("outcome")), transition: "opacity 0.45s ease" }}
+          />
 
           {/* per-lane: moderator ticks, contradiction arrow */}
           {LANES.map((lane) => {
@@ -189,6 +371,13 @@ export function ConceptualModel() {
                     stroke="#5b5560"
                     strokeWidth={2}
                     markerEnd="url(#arrow)"
+                    style={{
+                      opacity: connOpacity(
+                        inStep(`mods:${lane.id}`) ||
+                          isSpot(`mod:${lane.id}:${p.label}`),
+                      ),
+                      transition: "opacity 0.45s ease",
+                    }}
                   />
                 ))}
                 {/* contradiction up-arrow */}
@@ -200,26 +389,35 @@ export function ConceptualModel() {
                   stroke={COLOR[lane.id]}
                   strokeWidth={2}
                   markerEnd={`url(#arrow-${lane.id})`}
+                  style={{
+                    opacity: connOpacity(isSpot(`con:${lane.id}`)),
+                    transition: "opacity 0.45s ease",
+                  }}
                 />
 
                 {/* moderator pills */}
-                {pills.map((p) => (
-                  <NodeRect
-                    key={`mod-${p.label}`}
-                    x={p.x}
-                    y={modY}
-                    w={p.w}
-                    h={MOD_H}
-                    rx={MOD_H / 2}
-                    fill={p.theorised ? COLOR[lane.id] : "#ffffff"}
-                    stroke={COLOR[lane.id]}
-                    textColor={p.theorised ? "#ffffff" : "#1c1a1a"}
-                    label={p.theorised ? `${p.label} ★` : p.label}
-                    fontSize={15}
-                    onEnter={() => enter(p.tip, p.cx, modY)}
-                    onLeave={leave}
-                  />
-                ))}
+                {pills.map((p) => {
+                  const id = `mod:${lane.id}:${p.label}`;
+                  return (
+                    <NodeRect
+                      key={`mod-${p.label}`}
+                      x={p.x}
+                      y={modY}
+                      w={p.w}
+                      h={MOD_H}
+                      rx={MOD_H / 2}
+                      fill={p.theorised ? COLOR[lane.id] : "#ffffff"}
+                      stroke={COLOR[lane.id]}
+                      textColor={p.theorised ? "#ffffff" : "#1c1a1a"}
+                      label={p.theorised ? `${p.label} ★` : p.label}
+                      fontSize={15}
+                      dimmed={tourActive && !isSpot(id)}
+                      spotlight={isSpot(id)}
+                      onEnter={() => enter(p.tip, p.cx, modY)}
+                      onLeave={leave}
+                    />
+                  );
+                })}
 
                 {/* contradiction pill */}
                 <NodeRect
@@ -234,6 +432,8 @@ export function ConceptualModel() {
                   textColor={COLOR[lane.id]}
                   label={lane.contradiction}
                   fontSize={15}
+                  dimmed={tourActive && !isSpot(`con:${lane.id}`)}
+                  spotlight={isSpot(`con:${lane.id}`)}
                   onEnter={() => enter(lane.contradictionTip, CH_X + CH_W / 2, lane.y + CH_H / 2 + 70)}
                   onLeave={leave}
                 />
@@ -251,6 +451,8 @@ export function ConceptualModel() {
                   label={lane.challenge}
                   fontSize={16}
                   bold
+                  dimmed={tourActive && !isSpot(`ch:${lane.id}`)}
+                  spotlight={isSpot(`ch:${lane.id}`)}
                   onEnter={() => enter(lane.challengeTip, CH_X + CH_W / 2, lane.y)}
                   onLeave={leave}
                 />
@@ -272,6 +474,9 @@ export function ConceptualModel() {
             label="AI-generated Instagram Reels advertising"
             fontSize={14}
             wrap
+            highlight="#8a8079"
+            dimmed={tourActive && !isSpot("source")}
+            spotlight={isSpot("source")}
             onEnter={() => enter("The starting point: a brand using Generative AI to make Instagram Reels for a Gen Z audience.", SRC.x + SRC.w / 2, SRC.y + SRC.h + 6)}
             onLeave={leave}
           />
@@ -289,13 +494,16 @@ export function ConceptualModel() {
             label="Gen Z brand trust"
             fontSize={17}
             bold
+            highlight="#1f3551"
+            dimmed={tourActive && !isSpot("outcome")}
+            spotlight={isSpot("outcome")}
             onEnter={() => enter("The outcome the whole model explains: whether Gen Z keeps trusting the brand after seeing AI used in its Reels.", TRUST.x + TRUST.w / 2, TRUST.y)}
             onLeave={leave}
           />
         </svg>
 
-        {/* hover tooltip overlay */}
-        {hover && (
+        {/* hover tooltip overlay (hidden during the guided walkthrough) */}
+        {hover && !tourActive && (
           <div
             className="pointer-events-none absolute z-30 w-56 -translate-x-1/2 rounded-xl bg-[var(--color-blue-opal-deep)] px-3 py-2 text-[12.5px] leading-snug text-white shadow-[0_16px_40px_-18px_rgba(0,0,0,0.6)]"
             style={{
@@ -311,21 +519,102 @@ export function ConceptualModel() {
         )}
       </div>
 
-      {/* legend */}
-      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-[var(--color-skyway)]/30 pt-4 text-[12px] text-[var(--color-ink-soft)]/75">
-        <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block size-3 rounded-full bg-[var(--color-blue-opal)]" />
-          Theorised moderator (from literature)
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block size-3 rounded-full border border-[var(--color-blue-opal)] bg-white" />
-          Emergent moderator (from interviews)
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block size-3 rounded-full border border-dashed border-[var(--color-rythmic-red)] bg-white" />
-          Contradiction
-        </span>
-        <span className="text-[var(--color-ink-soft)]/55">· Hover any box to read what it means.</span>
+      {/* legend / walkthrough narration */}
+      {tourActive && step ? (
+        <div
+          key={tourStep}
+          className="tour-card mt-5 border-t border-[var(--color-skyway)]/30 pt-4"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5">
+              {TOUR.map((_, i) => (
+                <span
+                  key={i}
+                  className={[
+                    "h-1.5 rounded-full transition-all duration-300",
+                    i === tourStep
+                      ? "w-6 bg-[var(--color-syrah)]"
+                      : i < tourStep!
+                        ? "w-1.5 bg-[var(--color-syrah)]/40"
+                        : "w-1.5 bg-[var(--color-skyway)]/50",
+                  ].join(" ")}
+                />
+              ))}
+              <span className="ml-2 text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink-soft)]/50">
+                {tourStep! + 1} / {TOUR.length}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={exitTour}
+              className="text-[12px] text-[var(--color-ink-soft)]/60 transition hover:text-[var(--color-syrah)]"
+            >
+              Exit ✕
+            </button>
+          </div>
+
+          <h4 className="font-display mt-3 text-xl text-[var(--color-syrah-deep)]">
+            {step.title}
+          </h4>
+          <p className="mt-1.5 max-w-2xl text-[14px] leading-relaxed text-[var(--color-ink-soft)]">
+            {step.body}
+          </p>
+
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={prevStep}
+              disabled={tourStep === 0}
+              className="lift inline-flex items-center gap-2 rounded-full border border-[var(--color-skyway)]/70 bg-white px-4 py-2 text-sm text-[var(--color-ink-soft)] transition hover:border-[var(--color-syrah)] hover:text-[var(--color-syrah)] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              ← Back
+            </button>
+            <button
+              type="button"
+              onClick={tourStep === TOUR.length - 1 ? exitTour : nextStep}
+              className="lift inline-flex items-center gap-2 rounded-full bg-[var(--color-syrah)] px-5 py-2 text-sm font-medium text-white transition hover:bg-[var(--color-syrah-deep)]"
+            >
+              {tourStep === TOUR.length - 1 ? "Done" : "Next"}
+              <span aria-hidden>→</span>
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-[var(--color-skyway)]/30 pt-4 text-[12px] text-[var(--color-ink-soft)]/75">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block size-3 rounded-full bg-[var(--color-blue-opal)]" />
+            Theorised moderator (from literature)
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block size-3 rounded-full border border-[var(--color-blue-opal)] bg-white" />
+            Emergent moderator (from interviews)
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block size-3 rounded-full border border-dashed border-[var(--color-rythmic-red)] bg-white" />
+            Contradiction
+          </span>
+        </div>
+      )}
+
+      {/* drag-to-resize handle on the card's right edge */}
+      <div
+        role="separator"
+        aria-label="Drag to resize the model"
+        onPointerDown={(e) => {
+          e.preventDefault();
+          draggingRef.current = true;
+          e.currentTarget.setPointerCapture(e.pointerId);
+        }}
+        onPointerMove={onResizeMove}
+        onPointerUp={(e) => {
+          draggingRef.current = false;
+          e.currentTarget.releasePointerCapture(e.pointerId);
+        }}
+        onDoubleClick={() => setCardWidth(null)}
+        title="Drag to resize · double-click to reset"
+        className="group absolute -right-1.5 top-0 flex h-full w-6 cursor-ew-resize touch-none items-center justify-center"
+      >
+        <span className="h-20 w-1.5 rounded-full bg-[var(--color-skyway)]/60 transition-all group-hover:h-32 group-hover:bg-[var(--color-syrah)]" />
       </div>
     </div>
   );
@@ -345,6 +634,9 @@ function NodeRect({
   bold,
   dashed,
   wrap,
+  highlight,
+  dimmed,
+  spotlight,
   onEnter,
   onLeave,
 }: {
@@ -361,22 +653,66 @@ function NodeRect({
   bold?: boolean;
   dashed?: boolean;
   wrap?: boolean;
+  /** Glow/border colour used while hovered or focused. Defaults to the stroke. */
+  highlight?: string;
+  /** Faded back during the walkthrough when another node is in focus. */
+  dimmed?: boolean;
+  /** In focus during the walkthrough: pulsing halo + scale-up. */
+  spotlight?: boolean;
   onEnter: () => void;
   onLeave: () => void;
 }) {
+  const [active, setActive] = useState(false);
   const cx = x + w / 2;
   const cy = y + h / 2;
+  const hi = highlight ?? stroke;
+  const lit = active || spotlight;
   // simple two-line wrap for the source node
   const lines = wrap ? wrapText(label, 22) : [label];
   return (
     <g
       tabIndex={0}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-      onFocus={onEnter}
-      onBlur={onLeave}
-      style={{ cursor: "help", outline: "none" }}
+      onMouseEnter={() => {
+        setActive(true);
+        onEnter();
+      }}
+      onMouseLeave={() => {
+        setActive(false);
+        onLeave();
+      }}
+      onFocus={() => {
+        setActive(true);
+        onEnter();
+      }}
+      onBlur={() => {
+        setActive(false);
+        onLeave();
+      }}
+      style={{
+        cursor: "help",
+        outline: "none",
+        opacity: dimmed ? 0.16 : 1,
+        transformBox: "fill-box",
+        transformOrigin: "center",
+        transform: spotlight ? "scale(1.06)" : "scale(1)",
+        transition: "opacity 0.45s ease, transform 0.45s var(--ease-out-expo)",
+      }}
     >
+      {/* highlight halo while hovered/focused or spotlit in the walkthrough */}
+      {lit && (
+        <rect
+          x={x - 5}
+          y={y - 5}
+          width={w + 10}
+          height={h + 10}
+          rx={rx + 5}
+          fill="none"
+          stroke={hi}
+          strokeWidth={3}
+          opacity={0.4}
+          className={spotlight && !active ? "tour-pulse" : undefined}
+        />
+      )}
       <rect
         x={x}
         y={y}
@@ -384,8 +720,8 @@ function NodeRect({
         height={h}
         rx={rx}
         fill={fill}
-        stroke={stroke}
-        strokeWidth={2}
+        stroke={lit ? hi : stroke}
+        strokeWidth={lit ? 4 : 2}
         strokeDasharray={dashed ? "5 4" : undefined}
       />
       {lines.map((ln, i) => (

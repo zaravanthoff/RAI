@@ -12,7 +12,7 @@ const grotesk = Schibsted_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "RAI in Reels — Responsible-AI check",
+  title: "RAI in Reels: Responsible-AI check",
   description:
     "Check whether your Generative-AI use in an Instagram Reel protects Gen Z brand trust, grounded in the study's emergent moderators.",
 };

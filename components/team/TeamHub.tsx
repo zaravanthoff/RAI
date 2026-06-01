@@ -1,36 +1,34 @@
 "use client";
 
-import type { Stage, StageId, StageStatus } from "@/lib/reelStages";
+import type { Section } from "@/data/assessment";
+import type { TeamStage, TeamStageId, TeamStageStatus } from "@/lib/teamStages";
 
-const REL_DOT: Record<string, string> = {
-  authenticity: "var(--color-tawny-port)",
-  bias: "var(--color-rythmic-red)",
-  ip: "var(--color-toffee)",
+const ACCENT_DOT: Record<Section["accent"], string> = {
+  "tawny-port": "var(--color-tawny-port)",
+  "rythmic-red": "var(--color-rythmic-red)",
+  toffee: "var(--color-toffee)",
 };
 
-const STATUS_LABEL: Record<StageStatus, string> = {
+const STATUS_LABEL: Record<TeamStageStatus, string> = {
   done: "Done",
   active: "Start",
   locked: "Locked",
-  skipped: "Not relevant",
 };
 
-export function ReelHub({
+export function TeamHub({
   stages,
   allComplete,
   onSelectStage,
-  onSeeVerdict,
+  onSeeResults,
   onExit,
 }: {
-  stages: Stage[];
+  stages: TeamStage[];
   allComplete: boolean;
-  onSelectStage: (id: StageId) => void;
-  onSeeVerdict: () => void;
+  onSelectStage: (id: TeamStageId) => void;
+  onSeeResults: () => void;
   onExit: () => void;
 }) {
-  const settled = stages.filter(
-    (s) => s.status === "done" || s.status === "skipped",
-  ).length;
+  const settled = stages.filter((s) => s.status === "done").length;
 
   return (
     <main className="relative flex min-h-screen flex-col bg-[var(--color-paper-soft)]">
@@ -49,13 +47,14 @@ export function ReelHub({
 
       <section className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-6 py-10 sm:px-8">
         <div className="reveal">
-          <p className="eyebrow text-[var(--color-syrah)]">Check a Reel</p>
+          <p className="eyebrow text-[var(--color-syrah)]">Assess our team</p>
           <h1 className="font-display mt-3 text-balance text-[2rem] leading-[1.05] text-[var(--color-syrah-deep)] sm:text-4xl">
-            Work through each step. Each one unlocks the next.
+            Rate your team across three trust relationships. Each one unlocks the
+            next.
           </h1>
           <p className="mt-3 max-w-lg text-sm text-[var(--color-ink-soft)] sm:text-base">
-            Set the scene first. Your answers decide which checks apply to this
-            Reel, so you only see the ones that matter.
+            Answer for how your team actually works today, not the aspiration.
+            Use &quot;Not sure&quot; whenever you genuinely don&apos;t know.
           </p>
         </div>
 
@@ -74,7 +73,7 @@ export function ReelHub({
           <button
             type="button"
             disabled={!allComplete}
-            onClick={onSeeVerdict}
+            onClick={onSeeResults}
             className={[
               "lift inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-4 text-sm font-medium sm:w-auto",
               allComplete
@@ -82,7 +81,9 @@ export function ReelHub({
                 : "cursor-not-allowed bg-[var(--color-skyway)]/40 text-[var(--color-ink-soft)]/60",
             ].join(" ")}
           >
-            {allComplete ? "See your verdict" : "Finish the steps to unlock your verdict"}
+            {allComplete
+              ? "See my results"
+              : "Finish the sections to unlock your results"}
             {allComplete && <span aria-hidden>→</span>}
           </button>
         </div>
@@ -96,12 +97,12 @@ function StageRow({
   index,
   onClick,
 }: {
-  stage: Stage;
+  stage: TeamStage;
   index: number;
   onClick: () => void;
 }) {
   const clickable = stage.status === "active" || stage.status === "done";
-  const dot = stage.id !== "scene" ? REL_DOT[stage.id] : null;
+  const dot = ACCENT_DOT[stage.accent];
 
   const indicator =
     stage.status === "done" ? (
@@ -111,10 +112,6 @@ function StageRow({
     ) : stage.status === "active" ? (
       <span className="grid size-8 place-items-center rounded-full bg-[var(--color-amberlight)] font-display text-sm text-[var(--color-syrah-deep)]">
         {index}
-      </span>
-    ) : stage.status === "skipped" ? (
-      <span className="grid size-8 place-items-center rounded-full bg-[var(--color-skyway)]/30 text-sm text-[var(--color-ink-soft)]/50">
-        –
       </span>
     ) : (
       <span className="grid size-8 place-items-center rounded-full bg-[var(--color-skyway)]/25 text-[var(--color-ink-soft)]/45">
@@ -143,24 +140,20 @@ function StageRow({
           clickable
             ? "lift cursor-pointer border-black/5 bg-white shadow-[0_24px_60px_-50px_rgba(31,53,81,0.4)] hover:border-[var(--color-syrah)]/25"
             : "cursor-not-allowed border-transparent bg-white/40",
-          stage.status === "active"
-            ? "ring-1 ring-[var(--color-amberlight)]"
-            : "",
+          stage.status === "active" ? "ring-1 ring-[var(--color-amberlight)]" : "",
         ].join(" ")}
       >
         {indicator}
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2">
-            {dot && (
-              <span
-                className="inline-block size-1.5 rounded-full"
-                style={{ background: dot }}
-              />
-            )}
+            <span
+              className="inline-block size-1.5 rounded-full"
+              style={{ background: dot }}
+            />
             <span
               className={[
                 "font-display text-lg",
-                stage.status === "locked" || stage.status === "skipped"
+                stage.status === "locked"
                   ? "text-[var(--color-ink-soft)]/55"
                   : "text-[var(--color-syrah-deep)]",
               ].join(" ")}
@@ -169,13 +162,9 @@ function StageRow({
             </span>
           </span>
           <span className="mt-0.5 block truncate text-[13px] text-[var(--color-ink-soft)]/65">
-            {stage.status === "skipped"
-              ? "No AI-trust risk to check for this Reel."
-              : stage.status === "locked"
-                ? "Unlocks once the previous step is done."
-                : stage.total > 0
-                  ? `${stage.answered} of ${stage.total} answered`
-                  : stage.blurb}
+            {stage.status === "locked"
+              ? "Unlocks once the previous section is done."
+              : `${stage.answered} of ${stage.total} answered`}
           </span>
         </span>
         <span

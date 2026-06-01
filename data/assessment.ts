@@ -20,6 +20,8 @@ export interface Question {
   id: string;
   dimensionId: string;
   text: string;
+  /** Plain-language explanation of what the statement means and how to rate it. */
+  help: string;
 }
 
 export interface Section {
@@ -267,21 +269,25 @@ export const questions: Question[] = [
     id: "q-autonomy-1",
     dimensionId: "autonomy",
     text: "A human on our team keeps real creative control over AI-generated Reels, reviewing and reworking output rather than shipping it as-is.",
+    help: "In other words: does a person actively direct and edit what the AI makes (changing real creative choices) instead of publishing the raw output? Rate high if someone always reviews, reworks and signs off; rate low if AI output often goes live more or less untouched.",
   },
   {
     id: "q-craft-1",
     dimensionId: "human-craft",
     text: "Our AI-assisted Reels contain something visibly human-made (a face, a performance, hand-shot footage) in the first few seconds.",
+    help: "Think about whether a viewer can see a clearly human element early on: a real face, a live performance, footage you actually shot. Rate high if most Reels open with something unmistakably human; rate low if they tend to read as fully AI-generated.",
   },
   {
     id: "q-creativity-1",
     dimensionId: "original-creativity",
     text: "Our Reels start from a distinctive brand idea and use AI to execute it, rather than starting from a generic AI-default concept.",
+    help: "This is about where the core idea comes from. Rate high if your team locks a distinctive concept first and then uses AI to produce it; rate low if you tend to run with whatever the AI suggests, which often looks like the concept it handed ten other brands.",
   },
   {
     id: "q-usecase-1",
     dimensionId: "use-case-fit",
     text: "When we use GAI in a Reel, the team can articulate in one sentence why AI was the right tool for that specific Reel.",
+    help: "This is about using AI on purpose, not by default. Rate high if the team can quickly explain why AI suited that particular Reel; rate low if AI is simply the automatic choice, even where another approach would serve the creative better.",
   },
 
   // Bias
@@ -289,16 +295,19 @@ export const questions: Question[] = [
     id: "q-nonbias-1",
     dimensionId: "nonbiasedness",
     text: "Every AI-generated Reel is checked for visible stereotypes and exclusion (who is shown, who is missing, who is othered) before it is published.",
+    help: "This means a deliberate look at the finished cut for who appears, who is left out, and whether anyone is stereotyped. Rate high if you run that check on every AI-assisted Reel before it ships; rate low if it only happens occasionally or by chance.",
   },
   {
     id: "q-critical-1",
     dimensionId: "critical-thinking",
     text: "We interrogate our own briefings and prompts for bias, not just the AI's output.",
+    help: "Bias often enters through your own brief, prompts and casting choices, not just the AI's result. Rate high if you actively question those inputs before you generate anything; rate low if you only inspect what the AI gives back.",
   },
   {
     id: "q-baf-1",
     dimensionId: "brand-audience-fit",
     text: "Our AI-generated Reels reflect the lived reality of the specific Gen Z segment we are targeting.",
+    help: "This asks whether the people and world shown actually match the Gen Z audience you're trying to reach. Rate high if Reels feel made for that segment and you pressure-test that with them; rate low if the output drifts to a generic default that doesn't reflect them.",
   },
 
   // IP
@@ -306,21 +315,25 @@ export const questions: Question[] = [
     id: "q-triplec-1",
     dimensionId: "crediting",
     text: "We handle credit, consent and compensation together as one practice for AI-assisted Reels, not as an optional disclosure tick-box.",
+    help: "This treats crediting as three linked things handled together as standard: crediting sources, getting consent, and paying the people involved. Rate high if you can point to all three on an AI-assisted Reel; rate low if you only disclose AI use, or do none of them.",
   },
   {
     id: "q-collab-1",
     dimensionId: "creator-collaboration",
     text: "Named creators are visibly involved in our AI-assisted Reels, not just behind the scenes.",
+    help: "This is about real, visible collaboration with named creators (photographers, artists, models) on AI-assisted work, so the audience can see they were part of it. Rate high if creators are openly credited and involved; rate low if they're absent or kept hidden.",
   },
   {
     id: "q-prov-1",
     dimensionId: "provenance",
     text: "We can trace and disclose the source of the training data and tooling behind the AI-generated assets in our Reels.",
+    help: "This asks whether you could show which tool made an asset, and what that tool was trained on, if someone asked. Rate high if you log the tool, prompt and source and could disclose them; rate low if you couldn't trace where the AI assets came from.",
   },
   {
     id: "q-legal-1",
     dimensionId: "legal-guardrails",
     text: "An established internal legal or compliance path reviews AI-generated Reels before they ship.",
+    help: "This is about having a real, repeatable legal or compliance check for AI-assisted Reels, not an occasional informal glance. Rate high if review is a standing step and the team keeps current on the law; rate low if it's ad hoc or skipped.",
   },
 ];
 

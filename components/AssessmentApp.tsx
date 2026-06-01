@@ -3,21 +3,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { sections } from "@/data/assessment";
 import type { ReelAnswers } from "@/data/reelCheck";
-import {
-  isAssessmentComplete,
-  isSectionComplete,
-  progressFraction,
-  scoreAssessment,
-  type Answer,
-  type Answers,
-} from "@/lib/scoring";
+import { scoreAssessment, type Answer, type Answers } from "@/lib/scoring";
 import { scoreReel } from "@/lib/reelScoring";
 import { clearState, loadState, saveState, type Mode } from "@/lib/storage";
 import { Landing } from "./Landing";
 import { Research } from "./research/Research";
-import { SectionCard } from "./SectionCard";
-import { ProgressBar } from "./ProgressBar";
 import { ResultsDashboard } from "./ResultsDashboard";
+import { TeamFlow } from "./team/TeamFlow";
+import { PlanFlow } from "./plan/PlanFlow";
 import { ReelFlow } from "./reel/ReelFlow";
 import { ReelResults } from "./reel/ReelResults";
 
@@ -27,7 +20,8 @@ type Stage =
   | "team"
   | "team-results"
   | "reel"
-  | "reel-results";
+  | "reel-results"
+  | "plan";
 
 const TOTAL_STEPS = sections.length;
 
@@ -36,6 +30,7 @@ export function AssessmentApp() {
   const [step, setStep] = useState(0); // team: 0..TOTAL_STEPS-1
   const [answers, setAnswers] = useState<Answers>({});
   const [reelAnswers, setReelAnswers] = useState<ReelAnswers>({});
+  const [planAnswers, setPlanAnswers] = useState<ReelAnswers>({});
   const [hydrated, setHydrated] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
 
@@ -45,6 +40,7 @@ export function AssessmentApp() {
     if (saved) {
       setAnswers(saved.answers ?? {});
       setReelAnswers(saved.reelAnswers ?? {});
+      setPlanAnswers(saved.planAnswers ?? {});
       setStep(Math.min(Math.max(saved.step ?? 0, 0), TOTAL_STEPS - 1));
     }
     setHydrated(true);
@@ -56,10 +52,11 @@ export function AssessmentApp() {
     saveState({
       answers,
       reelAnswers,
+      planAnswers,
       step,
       updatedAt: new Date().toISOString(),
     });
-  }, [answers, reelAnswers, step, hydrated]);
+  }, [answers, reelAnswers, planAnswers, step, hydrated]);
 
   const teamInProgress = useMemo(
     () => Object.values(answers).some((v) => v !== null && v !== undefined),
@@ -68,6 +65,10 @@ export function AssessmentApp() {
   const reelInProgress = useMemo(
     () => Object.keys(reelAnswers).length > 0,
     [reelAnswers],
+  );
+  const planInProgress = useMemo(
+    () => Object.keys(planAnswers).length > 0,
+    [planAnswers],
   );
 
   const scrollTop = () =>
@@ -83,14 +84,10 @@ export function AssessmentApp() {
 
   const selectMode = (mode: Mode) => {
     if (mode === "reel") goTo("reel");
+    else if (mode === "plan") goTo("plan");
     else goTo("team", teamInProgress ? step : 0);
   };
 
-  const currentSection = sections[step];
-  const fraction = progressFraction(answers);
-  const currentComplete = currentSection
-    ? isSectionComplete(currentSection.id, answers)
-    : false;
   const teamResult = useMemo(() => scoreAssessment(answers), [answers]);
   const reelResult = useMemo(() => scoreReel(reelAnswers), [reelAnswers]);
 
@@ -102,10 +99,12 @@ export function AssessmentApp() {
         onResearch={() => goTo("research")}
         reelInProgress={reelInProgress}
         teamInProgress={teamInProgress}
+        planInProgress={planInProgress}
         onClear={() => {
           clearState();
           setAnswers({});
           setReelAnswers({});
+          setPlanAnswers({});
           setStep(0);
         }}
       />
@@ -155,6 +154,24 @@ export function AssessmentApp() {
     );
   }
 
+  // ── Plan a Reel (pre-production) ───────────────────────────────
+  if (stage === "plan") {
+    return (
+      <>
+        <div ref={topRef} />
+        <PlanFlow
+          answers={planAnswers}
+          onAnswer={(qid, value) =>
+            setPlanAnswers((prev) => ({ ...prev, [qid]: value }))
+          }
+          onRestart={() => setPlanAnswers({})}
+          onCheckInstead={() => goTo("reel")}
+          onExit={() => goTo("landing")}
+        />
+      </>
+    );
+  }
+
   // ── Team results ───────────────────────────────────────────────
   if (stage === "team-results") {
     return (
@@ -174,63 +191,16 @@ export function AssessmentApp() {
 
   // ── Team assessment ────────────────────────────────────────────
   return (
-    <main className="min-h-screen pb-24">
-      <ProgressBar step={step} total={TOTAL_STEPS} fraction={fraction} />
-
+    <>
       <div ref={topRef} />
-
-      <div className="mx-auto max-w-4xl px-4 pt-10 sm:px-8">
-        <SectionCard
-          section={currentSection}
-          answers={answers}
-          onAnswer={(qid: string, value: Answer) =>
-            setAnswers((prev) => ({ ...prev, [qid]: value }))
-          }
-        />
-
-        <nav className="no-print mt-8 flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            type="button"
-            onClick={() => {
-              if (step === 0) goTo("landing");
-              else goTo("team", step - 1);
-            }}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--color-skyway)] bg-white px-5 py-3 text-sm text-[var(--color-ink-soft)] transition hover:border-[var(--color-syrah)] hover:text-[var(--color-syrah)]"
-          >
-            ← {step === 0 ? "Back to start" : `Section ${step}`}
-          </button>
-
-          <div className="flex flex-col items-end gap-2 sm:items-end">
-            {!currentComplete && (
-              <p className="text-xs text-[var(--color-ink-soft)]/70">
-                Tip: every question needs an answer or a &quot;Not sure&quot;.
-              </p>
-            )}
-            <button
-              type="button"
-              disabled={!currentComplete}
-              onClick={() => {
-                if (step === TOTAL_STEPS - 1) {
-                  if (isAssessmentComplete(answers)) goTo("team-results");
-                } else {
-                  goTo("team", step + 1);
-                }
-              }}
-              className={[
-                "inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition",
-                currentComplete
-                  ? "bg-[var(--color-syrah)] text-white hover:bg-[var(--color-syrah-deep)]"
-                  : "cursor-not-allowed bg-[var(--color-skyway)]/60 text-white/70",
-              ].join(" ")}
-            >
-              {step === TOTAL_STEPS - 1
-                ? "See my results"
-                : `Next: ${sections[step + 1].title}`}
-              <span aria-hidden>→</span>
-            </button>
-          </div>
-        </nav>
-      </div>
-    </main>
+      <TeamFlow
+        answers={answers}
+        onAnswer={(qid: string, value: Answer) =>
+          setAnswers((prev) => ({ ...prev, [qid]: value }))
+        }
+        onComplete={() => goTo("team-results")}
+        onExit={() => goTo("landing")}
+      />
+    </>
   );
 }

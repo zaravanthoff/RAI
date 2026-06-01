@@ -2,20 +2,28 @@
 
 import type { Mode } from "@/lib/storage";
 
+const STAGES = [
+  { n: 1, when: "Before you make it" },
+  { n: 2, when: "After you make it" },
+  { n: 3, when: "Zoom out" },
+];
+
 export function Landing({
   onSelect,
   onResearch,
   reelInProgress,
   teamInProgress,
+  planInProgress,
   onClear,
 }: {
   onSelect: (mode: Mode) => void;
   onResearch: () => void;
   reelInProgress: boolean;
   teamInProgress: boolean;
+  planInProgress: boolean;
   onClear: () => void;
 }) {
-  const hasProgress = reelInProgress || teamInProgress;
+  const hasProgress = reelInProgress || teamInProgress || planInProgress;
 
   return (
     <main className="relative flex min-h-screen flex-col bg-[var(--color-paper-soft)]">
@@ -36,41 +44,91 @@ export function Landing({
             Responsible AI · Instagram Reels · Gen Z
           </p>
           <h1 className="font-display mt-5 text-balance text-[2.1rem] leading-[1.06] text-[var(--color-syrah-deep)] sm:text-5xl lg:text-[3.4rem]">
-            How to use AI responsibly in Instagram Reels advertising to maintain
-            Gen&nbsp;Z brand trust.
+            How to use AI responsibly in Instagram Reels advertising without
+            losing Gen&nbsp;Z&apos;s trust.
           </h1>
           <p className="mt-6 max-w-xl text-pretty text-base text-[var(--color-ink-soft)] sm:text-lg">
             The trust problem isn&apos;t the AI. It&apos;s the choices you make
-            around it. Pick how you want to start.
+            around it. Three tools follow one Reel through its life. Pick where
+            you are.
           </p>
         </div>
 
-        {/* mode choices */}
-        <div className="stagger mt-10 grid max-w-5xl gap-4 sm:mt-12 sm:grid-cols-3">
-          <ModeCard
-            tone="primary"
-            kicker="Diagnose one piece of content"
-            title="Check a Reel"
-            body="Walk one AI-assisted Reel through a short, adaptive check. Get a clear verdict and a fix-it list before it goes live."
-            cta={reelInProgress ? "Resume" : "Start a check"}
-            onClick={() => onSelect("reel")}
-          />
-          <ModeCard
-            tone="white"
-            kicker="Step back to the bigger picture"
-            title="Assess our team"
-            body="Rate how your team works with GAI in Reels across the study's dimensions. A readiness score for a workshop debrief."
-            cta={teamInProgress ? "Resume" : "Assess our team"}
-            onClick={() => onSelect("team")}
-          />
-          <ModeCard
-            tone="muted"
-            kicker="Understand the thinking"
-            title="The research"
-            body="See the study behind the tool: the conceptual model, the three trust relationships, and what the interviews found."
-            cta="Read about the research"
+        {/* the three tools, as a before → after → zoom-out journey */}
+        <div className="mt-10 sm:mt-12">
+          {/* connected timeline rail (desktop) — columns align with the cards */}
+          <div className="mb-4 hidden grid-cols-3 gap-4 sm:grid">
+            {STAGES.map((s, i) => (
+              <div key={s.n} className="flex items-center gap-3">
+                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[var(--color-syrah)] text-[13px] font-semibold text-white">
+                  {s.n}
+                </span>
+                <span className="eyebrow whitespace-nowrap text-[var(--color-syrah)]/80">
+                  {s.when}
+                </span>
+                {i < STAGES.length - 1 && (
+                  <span className="h-px flex-1 bg-[var(--color-skyway)]/60" />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* tool cards */}
+          <div className="stagger grid gap-4 sm:grid-cols-3">
+            <ToolCard
+              n={1}
+              tone="primary"
+              when="Before you make it"
+              title="Plan a Reel"
+              body="Compose the Reel you're about to make — describe the video, caption, brand and hashtags — and watch it build live. Get a responsible-AI brief tailored to that exact Reel."
+              cta={planInProgress ? "Resume in the studio" : "Open the studio"}
+              onClick={() => onSelect("plan")}
+            />
+            <ToolCard
+              n={2}
+              tone="white"
+              when="After you make it"
+              title="Check a Reel"
+              body="Walk one AI-assisted Reel through a short, adaptive check. Get a clear verdict and a fix-it list before it goes live."
+              cta={reelInProgress ? "Resume the check" : "Start a check"}
+              onClick={() => onSelect("reel")}
+            />
+            <ToolCard
+              n={3}
+              tone="white"
+              when="Zoom out"
+              title="Assess our team"
+              body="Rate how your team works with GAI in Reels across the study's dimensions. A readiness score for a workshop debrief."
+              cta={teamInProgress ? "Resume the assessment" : "Assess our team"}
+              onClick={() => onSelect("team")}
+            />
+          </div>
+
+          {/* research — quiet 'learn' row, divided off from the tools */}
+          <button
+            type="button"
             onClick={onResearch}
-          />
+            className="group mt-7 flex w-full flex-col items-start gap-4 border-t border-[var(--color-skyway)]/40 pt-6 text-left sm:flex-row sm:items-center sm:justify-between"
+          >
+            <span className="max-w-xl">
+              <span className="eyebrow block text-[var(--color-syrah)]/60">
+                Understand the thinking
+              </span>
+              <span className="mt-1 block text-[15px] leading-relaxed text-[var(--color-ink-soft)]">
+                The research behind the tool — the conceptual model, the three trust
+                relationships, and what the interviews found.
+              </span>
+            </span>
+            <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[var(--color-syrah)]/30 px-5 py-2.5 text-sm font-medium text-[var(--color-syrah)] transition group-hover:border-[var(--color-syrah)] group-hover:bg-white">
+              Read the research
+              <span
+                aria-hidden
+                className="transition-transform duration-500 [transition-timing-function:var(--ease-out-expo)] group-hover:translate-x-1"
+              >
+                →
+              </span>
+            </span>
+          </button>
         </div>
       </section>
 
@@ -94,30 +152,29 @@ export function Landing({
   );
 }
 
-type Tone = "primary" | "white" | "muted";
+type Tone = "primary" | "white";
 
-function ModeCard({
-  tone = "white",
-  kicker,
+function ToolCard({
+  n,
+  tone,
+  when,
   title,
   body,
   cta,
   onClick,
 }: {
-  tone?: Tone;
-  kicker: string;
+  n: number;
+  tone: Tone;
+  when: string;
   title: string;
   body: string;
   cta: string;
   onClick: () => void;
 }) {
   const primary = tone === "primary";
-  const surface =
-    tone === "primary"
-      ? "bg-[var(--color-blue-opal)] text-white shadow-[0_30px_80px_-50px_rgba(31,53,81,0.55)] hover:shadow-[0_40px_90px_-45px_rgba(31,53,81,0.6)]"
-      : tone === "muted"
-        ? "bg-[var(--color-paper)] text-[var(--color-ink)] ring-1 ring-[var(--color-skyway)]/40 hover:ring-[var(--color-syrah)]/25"
-        : "bg-white text-[var(--color-ink)] ring-1 ring-black/5 hover:ring-[var(--color-syrah)]/25";
+  const surface = primary
+    ? "bg-[var(--color-blue-opal)] text-white shadow-[0_30px_80px_-50px_rgba(31,53,81,0.55)] hover:shadow-[0_40px_90px_-45px_rgba(31,53,81,0.6)]"
+    : "bg-white text-[var(--color-ink)] ring-1 ring-black/5 hover:ring-[var(--color-syrah)]/25";
 
   return (
     <button
@@ -125,17 +182,31 @@ function ModeCard({
       onClick={onClick}
       className={`lift group flex flex-col rounded-3xl p-6 text-left sm:p-7 ${surface}`}
     >
-      <span
-        className={[
-          "eyebrow",
-          primary ? "text-[var(--color-amberlight)]" : "text-[var(--color-syrah)]/70",
-        ].join(" ")}
-      >
-        {kicker}
-      </span>
+      {/* stage marker — only on mobile; the desktop rail carries it otherwise */}
+      <div className="flex items-center gap-2.5 sm:hidden">
+        <span
+          className={[
+            "grid size-7 shrink-0 place-items-center rounded-full text-[13px] font-semibold",
+            primary
+              ? "bg-[var(--color-amberlight)] text-[var(--color-blue-opal-deep)]"
+              : "bg-[var(--color-syrah)] text-white",
+          ].join(" ")}
+        >
+          {n}
+        </span>
+        <span
+          className={[
+            "eyebrow",
+            primary ? "text-[var(--color-amberlight)]" : "text-[var(--color-syrah)]/70",
+          ].join(" ")}
+        >
+          {when}
+        </span>
+      </div>
+
       <h2
         className={[
-          "font-display mt-2 text-2xl sm:text-3xl",
+          "font-display mt-3 text-2xl sm:mt-0 sm:text-3xl",
           primary ? "text-white" : "text-[var(--color-syrah-deep)]",
         ].join(" ")}
       >
