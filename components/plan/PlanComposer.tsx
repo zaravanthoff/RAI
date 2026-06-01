@@ -90,7 +90,7 @@ export function PlanComposer({
       />
 
       {/* header */}
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 pt-7 sm:px-8">
+      <header className="reveal mx-auto flex w-full max-w-6xl items-center justify-between px-6 pt-7 sm:px-8">
         <button
           type="button"
           onClick={onExit}
@@ -98,22 +98,18 @@ export function PlanComposer({
         >
           ← Home
         </button>
-        <span className="inline-flex items-center gap-2 text-[13px] text-[var(--color-ink-soft)]/75">
-          <span className="ig-ring inline-block size-2.5 rounded-full" />
-          <span className="font-medium text-[var(--color-syrah-deep)]">Reel Studio</span>
-        </span>
       </header>
 
-      <div className="mx-auto w-full max-w-6xl px-5 pb-28 pt-6 sm:px-8">
+      <div className="mx-auto w-full max-w-6xl px-6 pb-28 pt-6 sm:px-8">
         <div className="reveal max-w-2xl">
-          <p className="eyebrow text-[var(--color-syrah)]/70">Before you make it · personalize</p>
-          <h1 className="font-display mt-2 text-balance text-[1.9rem] leading-[1.08] text-[var(--color-syrah-deep)] sm:text-4xl">
+          <p className="eyebrow text-[var(--color-syrah)]">Plan a Reel</p>
+          <h1 className="font-display mt-3 text-balance text-[2rem] leading-[1.05] text-[var(--color-syrah-deep)] sm:text-4xl">
             Compose the Reel you&apos;re about to make.
           </h1>
-          <p className="mt-3 text-[15px] leading-relaxed text-[var(--color-ink-soft)]">
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-[var(--color-ink-soft)] sm:text-base">
             Describe the video, write the caption, pick your brand and drop in the hashtags.
-            It builds live on the right, then turns into a responsible-AI brief made for
-            <span className="text-[var(--color-syrah)]"> this exact Reel.</span>
+            It builds live on the right, then turns into a responsible-AI brief made for{" "}
+            <span className="text-[var(--color-syrah)]">this exact Reel.</span>
           </p>
         </div>
 
@@ -336,7 +332,7 @@ export function PlanComposer({
 
       {/* sticky generate bar */}
       <div className="no-print fixed inset-x-0 bottom-0 z-20 border-t border-[var(--color-skyway)]/40 bg-white/85 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-6xl items-center gap-4 px-5 py-3.5 sm:px-8">
+        <div className="mx-auto flex w-full max-w-6xl items-center gap-4 px-6 py-3.5 sm:px-8">
           <div className="hidden flex-1 sm:block">
             <div className="flex items-center justify-between text-[12px] text-[var(--color-ink-soft)]/70">
               <span>{canGenerate ? "Ready when you are" : "Fill the first four to generate"}</span>

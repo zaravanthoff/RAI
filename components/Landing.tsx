@@ -115,7 +115,7 @@ export function Landing({
                 Understand the thinking
               </span>
               <span className="mt-1 block text-[15px] leading-relaxed text-[var(--color-ink-soft)]">
-                The research behind the tool — the conceptual model, the three trust
+                The research behind the tool: the conceptual model, the three trust
                 relationships, and what the interviews found.
               </span>
             </span>
